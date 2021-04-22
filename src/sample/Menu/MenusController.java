@@ -80,8 +80,10 @@ public class MenusController implements Initializable {
         tvObservableList = FXCollections.observableArrayList();
 
 
+        /** Initialize image **/
         List<Menu> list = new MenuService().findAll();
         list.forEach(Menu::initializeImageView);
+
         tvObservableList.addAll(list);
 
 
