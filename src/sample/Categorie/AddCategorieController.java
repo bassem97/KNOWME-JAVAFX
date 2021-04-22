@@ -49,6 +49,7 @@ public class AddCategorieController implements Initializable {
                         res = "../Ingredient/menus.fxml";
                         break;
 
+
                     case "Listes des menus":
                         res = "../Menu/menus.fxml";
                         break;
