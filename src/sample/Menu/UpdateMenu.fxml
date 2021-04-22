@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Menu.UpdateMenuController">
+    <children>
+        <Label layoutX="201.0" layoutY="31.0" text="modifier menu" textFill="#f84c5c" underline="true">
+            <font>
+                <Font size="22.0" />
+            </font></Label>
+        <Label layoutX="24.0" layoutY="99.0" text="Nom" />
+        <Label layoutX="24.0" layoutY="140.0" text="Description" />
+        <JFXTextField fx:id="tfName" layoutX="160.0" layoutY="94.0" />
+        <JFXTextField fx:id="tfDescription" layoutX="160.0" layoutY="135.0" />
+        <JFXButton fx:id="btnAjouter" layoutX="517.0" layoutY="379.0" onAction="#updateMenu" ripplerFill="#cd1f1f" text="modifier" />
+        <Label layoutX="26.0" layoutY="322.0" text="Type" />
+        <JFXListView fx:id="listViewType" layoutX="97.0" layoutY="263.0" prefHeight="161.0" prefWidth="147.0" />
+        <Button fx:id="imageButton" layoutX="255.0" layoutY="317.0" mnemonicParsing="false" onAction="#uploadImage" text="Image" />
+        <ImageView fx:id="imageView" fitHeight="136.0" fitWidth="179.0" layoutX="328.0" layoutY="275.0" pickOnBounds="true" preserveRatio="true" />
+        <MenuBar fx:id="eventMenu" layoutY="-2.0">
+            <menus>
+                <Menu mnemonicParsing="false" text="Liste des menus">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Liste Des Ingredient" />
+                        <MenuItem mnemonicParsing="false" text="Listes des menus" />
+                        <MenuItem mnemonicParsing="false" text="Les categories" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </children>
+</AnchorPane>

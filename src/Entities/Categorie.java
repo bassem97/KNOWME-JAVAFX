@@ -44,11 +44,12 @@ public class Categorie {
 
     @Override
     public String toString() {
-        return "Categorie{" +
-                "id=" + id +
-                ", nom='" + nom + '\'' +
-                ", description='" + description + '\'' +
-                ", menus=" + menus +
-                '}';
+//        return "Categorie{" +
+//                "id=" + id +
+//                ", nom='" + nom + '\'' +
+//                ", description='" + description + '\'' +
+//                ", menus=" + menus +
+//                '}';
+        return nom +"";
     }
 }

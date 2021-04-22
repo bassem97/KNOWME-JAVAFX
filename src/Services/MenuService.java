@@ -1,6 +1,6 @@
 package Services;
 
-import Entities.Menu;
+import Entities.*;
 import Entities.Menu;
 import Entities.Menu;
 import tools.MyConnection;
@@ -113,5 +113,21 @@ public class MenuService {
             System.out.println(ex.getMessage());
         }
         return myList;
+    }
+
+    public List<Menu> findByCategorie(Categorie categorie) {
+        try {
+            String request = "SELECT * FROM menu where categorie_id = "+ categorie.getId();
+            PreparedStatement pst = MyConnection.getInstance().getCnx().prepareStatement(request);
+            ResultSet rs = pst.executeQuery(request);
+            List<Menu> menus = new ArrayList<>();
+            while (rs.next())
+                menus.add(new Menu(rs.getString("name"),rs.getString("description")));
+            return menus;
+
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
     }
 }

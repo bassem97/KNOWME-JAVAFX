@@ -3,6 +3,7 @@ package Services;
 import Entities.Ingredient;
 import Entities.Ingredient;
 import Entities.Ingredient;
+import Entities.Menu;
 import tools.MyConnection;
 
 import java.sql.PreparedStatement;
@@ -75,5 +76,21 @@ public class IngredientService {
             System.out.println(ex.getMessage());
         }
         return myList;
+    }
+
+    public List<Ingredient> findByMenu(Menu menu) {
+        try {
+            String request = "SELECT * FROM ingredient where menu_id = "+ menu.getId();
+            PreparedStatement pst = MyConnection.getInstance().getCnx().prepareStatement(request);
+            ResultSet rs = pst.executeQuery(request);
+            List<Ingredient> ingredients = new ArrayList<>();
+            while (rs.next())
+                ingredients.add(new Ingredient(rs.getString("description"), new MenuService().findById(rs.getInt("menu_id"))));
+            return ingredients;
+
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
     }
 }

@@ -40,6 +40,7 @@ public class CategorieService {
     }
 
     public void update(Categorie categorie) {
+        System.out.println("IDDDDDD"+categorie.getId());
         Categorie categorie1 = findById(categorie.getId());
         System.out.println("CHECKPOINT1"+categorie1);
         if(categorie1 != null){

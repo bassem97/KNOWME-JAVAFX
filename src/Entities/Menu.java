@@ -1,5 +1,9 @@
 package Entities;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -13,12 +17,14 @@ public class Menu {
     private LocalDateTime expiration_date;
     private Categorie categorie;
     private ArrayList<Ingredient> ingredients;
+    private final ImageView imageView;
 
     public Menu() {
         ingredients = new ArrayList<>();
         creation_date  = LocalDateTime.now();
         expiration_date  = creation_date.plusDays(1);
         is_expired = false;
+        imageView = new ImageView();
     }
 
     public Menu(String name, String description,Categorie categorie) {
@@ -29,6 +35,7 @@ public class Menu {
         creation_date  = LocalDateTime.now();
         expiration_date  = creation_date.plusDays(1);
         is_expired = false;
+        imageView = new ImageView();
     }
     public Menu(int id,String name, String description,Categorie categorie) {
         this.id = id;
@@ -39,7 +46,18 @@ public class Menu {
         creation_date  = LocalDateTime.now();
         expiration_date  = creation_date.plusDays(1);
         is_expired = false;
+        imageView = new ImageView();
     }
+    public Menu(String name, String description) {
+        this.name = name;
+        this.description = description;
+        ingredients = new ArrayList<>();
+        creation_date  = LocalDateTime.now();
+        expiration_date  = creation_date.plusDays(1);
+        is_expired = false;
+        imageView = new ImageView();
+    }
+
 
 
 
@@ -117,15 +135,31 @@ public class Menu {
 
     @Override
     public String toString() {
-        return "Menu{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", img='" + img + '\'' +
-                ", is_expired=" + is_expired +
-                ", date=" + creation_date +
-                ", expiration_date=" + expiration_date +
-                ", categorie=" + categorie +
-                '}';
+//        return "Menu{" +
+//                "id=" + id +
+//                ", name='" + name + '\'' +
+//                ", description='" + description + '\'' +
+//                ", img='" + img + '\'' +
+//                ", is_expired=" + is_expired +
+//                ", date=" + creation_date +
+//                ", expiration_date=" + expiration_date +
+//                ", categorie=" + categorie +
+//                '}';
+        return name+"";
+    }
+    public void initializeImageView() {
+        File file = new File("src/assets/" + this.img);
+        try {
+            Image img = new Image(file.toURI().toString());
+            imageView.setImage(img);
+            imageView.setFitWidth(70);
+            imageView.setFitHeight(70);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public ImageView getImageView() {
+        return imageView;
     }
 }
