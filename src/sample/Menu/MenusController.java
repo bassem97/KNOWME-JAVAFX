@@ -2,13 +2,21 @@ package sample.Menu;
 
 import Entities.Ingredient;
 import Entities.Menu;
+import Services.CategorieService;
 import Services.IngredientService;
 import Services.MenuService;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
+import com.sun.javafx.application.HostServicesDelegate;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import javafx.application.HostServices;
+import javafx.application.HostServices.*;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,20 +26,30 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
+import javafx.util.Duration;
+import tray.notification.NotificationType;
+import tray.notification.TrayNotification;
 
+import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import com.itextpdf.text.Image;
 
 public class MenusController implements Initializable {
 
@@ -39,7 +57,9 @@ public class MenusController implements Initializable {
     public FontAwesomeIconView btnNew;
     public MenuBar eventMenu;
     public JFXTextField searchField;
+    public JFXButton export;
     private ObservableList<Menu> tvObservableList;
+    private HostServices hostServices ;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -279,5 +299,82 @@ public class MenusController implements Initializable {
             FilteredList<Menu> x = tvObservableList.filtered(item -> item.getName().toLowerCase().contains(searchField.getText().toLowerCase()));
             tableView.setItems(x);
         }
+    }
+
+    public void export(ActionEvent actionEvent) throws FileNotFoundException, DocumentException {
+        Document my_pdf_report = new Document();
+
+        String home = System.getProperty("user.home");
+        PdfWriter.getInstance(my_pdf_report, new FileOutputStream(home+"/Downloads/Menus_PDF.pdf"));
+        my_pdf_report.open();
+        //we have four columns in our table
+        PdfPTable my_report_table = new PdfPTable(5);
+        //create a cell object
+        PdfPCell nom = new PdfPCell(new Phrase("Image"));
+        nom.setHorizontalAlignment(Element.ALIGN_CENTER);
+        nom.setBackgroundColor(BaseColor.CYAN);
+        my_report_table.addCell(nom);
+
+        PdfPCell descriptionCell = new PdfPCell(new Phrase("Nom"));
+        descriptionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        descriptionCell.setBackgroundColor(BaseColor.CYAN);
+        my_report_table.addCell(descriptionCell);
+
+        PdfPCell Menus = new PdfPCell(new Phrase("Categorie"));
+        Menus.setHorizontalAlignment(Element.ALIGN_CENTER);
+        Menus.setBackgroundColor(BaseColor.CYAN);
+        my_report_table.addCell(Menus);
+
+        PdfPCell expDate = new PdfPCell(new Phrase("Date expiration"));
+        expDate.setHorizontalAlignment(Element.ALIGN_CENTER);
+        expDate.setBackgroundColor(BaseColor.CYAN);
+        my_report_table.addCell(expDate);
+
+        PdfPCell ingredientsCell = new PdfPCell(new Phrase("Ingredients"));
+        ingredientsCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        ingredientsCell.setBackgroundColor(BaseColor.CYAN);
+        my_report_table.addCell(ingredientsCell);
+
+        List<Menu> list = new MenuService().findAll();
+        list.forEach(Menu::initializeImageView);
+        list.forEach(menu -> {
+            System.out.println(menu);
+            String name = menu.getName();
+            String categorie = menu.getCategorie().getNom();
+            LocalDateTime expiration_date = menu.getExpiration_date();
+            String ingredient = new IngredientService().findByMenu(new MenuService().findById(menu.getId())).toString();
+
+
+            PdfPCell image = null;
+            try {
+                image = new PdfPCell(Image.getInstance("D:/Desktop/knowme/src/assets/"+menu.getImg()) , true);
+            } catch (BadElementException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            my_report_table.addCell(image);
+            my_report_table.addCell(new PdfPCell(new Phrase(name)));
+            my_report_table.addCell(new PdfPCell(new Phrase(categorie)));
+            my_report_table.addCell(new PdfPCell(new Phrase(expiration_date.toString())));
+            my_report_table.addCell(new PdfPCell(new Phrase(ingredient)));
+        });
+
+        /* Attach report table to PDF */
+        my_pdf_report.add(my_report_table);
+        my_pdf_report.close();
+
+
+        // Open file from /downloads
+        File file = new File(home+"/Downloads/Menus_PDF.pdf");
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        new TrayNotification("PDF téléchargé !", " PDF des Menus sous /Téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
+
     }
 }

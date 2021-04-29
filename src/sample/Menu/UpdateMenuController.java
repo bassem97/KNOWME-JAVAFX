@@ -5,6 +5,7 @@ import Entities.Ingredient;
 import Entities.Menu;
 import Services.CategorieService;
 import Services.IngredientService;
+import Services.MenuService;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXListView;
@@ -21,6 +22,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
+import tray.notification.NotificationType;
+import tray.notification.TrayNotification;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -125,6 +129,19 @@ public class UpdateMenuController implements Initializable {
                 System.out.println(ex.getMessage());
             }
         }
+
+        new MenuService().update(menu);
+        new TrayNotification("Information", menu.getName() + " a été Modifié avec succès !", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("menus.fxml"));
+        Parent root = null;
+        try {
+            root = loader.load();
+            imageButton.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public JFXTextField getTfName() {

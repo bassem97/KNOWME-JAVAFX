@@ -19,6 +19,10 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
+import tray.notification.NotificationType;
+import tray.notification.TrayNotification;
+
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -85,7 +89,7 @@ public class AddCategorieController implements Initializable {
         categorie.setNom(tfName.getText());
         categorie.setDescription(tfDescription.getText());
         new CategorieService().save(categorie);
-        new tools.Alerts.Alert(Alert.AlertType.INFORMATION,"Categorie ajouté  !",null,categorie.getNom()+" est ajouté !");
+        new TrayNotification("Information", categorie.getNom() + " a été Créé avec succès !", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Categories.fxml"));
         Parent root = null;

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.control.Label?>
@@ -33,4 +34,8 @@
         </menus>
     </MenuBar>
     <JFXTextField fx:id="searchField" layoutX="617.0" layoutY="83.0" onKeyReleased="#search" promptText="Recherche" />
+   <JFXButton fx:id="export" buttonType="RAISED" layoutX="70.0" layoutY="83.0" onAction="#export" ripplerFill="#9c2827" style="-fx-background-color: #9c2827;" text="Export" textFill="WHITE">
+      <font>
+         <Font name="System Bold" size="15.0" />
+      </font></JFXButton>
 </AnchorPane>

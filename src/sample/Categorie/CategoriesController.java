@@ -5,6 +5,10 @@ import Entities.Menu;
 import Services.CategorieService;
 import Services.IngredientService;
 import Services.MenuService;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
@@ -19,12 +23,21 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import javafx.util.Duration;
+import tray.notification.NotificationType;
+import tray.notification.TrayNotification;
 
+import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Date;
@@ -40,11 +53,13 @@ public class CategoriesController implements Initializable {
     public FontAwesomeIconView btnNew;
     public MenuBar eventMenu;
     public JFXTextField searchField;
+    public JFXButton export;
     private ObservableList<Categorie> tvObservableList;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        if(new CategorieService().findAll().size() == 0)
+            export.setVisible(false);
         // Menu Onclick
         eventMenu.getMenus().get(0).getItems().forEach(menuItem -> {
             menuItem.setOnAction(event -> {
@@ -264,6 +279,54 @@ public class CategoriesController implements Initializable {
         else {
             FilteredList<Categorie> x = tvObservableList.filtered(item -> item.getNom().toLowerCase().contains(searchField.getText().toLowerCase()));
             tableView.setItems(x);
+        }
+    }
+
+    public void export(ActionEvent actionEvent) throws DocumentException, FileNotFoundException {
+
+        Document my_pdf_report = new Document();
+
+        String home = System.getProperty("user.home");
+        PdfWriter.getInstance(my_pdf_report, new FileOutputStream(home+"/Downloads/categories_PDF.pdf"));
+        my_pdf_report.open();
+            //we have four columns in our table
+        PdfPTable my_report_table = new PdfPTable(3);
+            //create a cell object
+        PdfPCell nom = new PdfPCell(new Phrase("Nom"));
+        nom.setHorizontalAlignment(Element.ALIGN_CENTER);
+        nom.setBackgroundColor(BaseColor.CYAN);
+        my_report_table.addCell(nom);
+
+        PdfPCell descriptionCell = new PdfPCell(new Phrase("Description"));
+        descriptionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        descriptionCell.setBackgroundColor(BaseColor.CYAN);
+        my_report_table.addCell(descriptionCell);
+
+        PdfPCell Menus = new PdfPCell(new Phrase("Menus"));
+        Menus.setHorizontalAlignment(Element.ALIGN_CENTER);
+        Menus.setBackgroundColor(BaseColor.CYAN);
+        my_report_table.addCell(Menus);
+
+        new CategorieService().findAll().forEach(categorie -> {
+            String name = categorie.getNom();
+            String description = categorie.getDescription();
+            String menus = new MenuService().findByCategorie(new CategorieService().findById(categorie.getId())).toString();
+            my_report_table.addCell(new PdfPCell(new Phrase(name)));
+            my_report_table.addCell(new PdfPCell(new Phrase(description)));
+            my_report_table.addCell(new PdfPCell(new Phrase(menus)));
+            System.out.println(my_report_table.getNumberOfColumns());
+        });
+
+            /* Attach report table to PDF */
+            my_pdf_report.add(my_report_table);
+            my_pdf_report.close();
+        new TrayNotification("PDF téléchargé !", " PDF des catégories sous /Téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
+
+        File file = new File(home+"/Downloads/categories_PDF.pdf");
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

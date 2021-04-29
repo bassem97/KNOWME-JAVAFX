@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
+<?import com.jfoenix.controls.JFXButton?>
 <AnchorPane prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Menu.MenusController">
 
     <Label layoutX="336.0" layoutY="48.0" text="Liste des Menus" textAlignment="CENTER" textFill="RED" underline="true">
@@ -33,4 +34,8 @@
         </menus>
     </MenuBar>
     <JFXTextField fx:id="searchField" layoutX="617.0" layoutY="83.0" onKeyReleased="#search" promptText="Recherche" />
+    <JFXButton fx:id="export" buttonType="RAISED" layoutX="70.0" layoutY="83.0" onAction="#export" ripplerFill="#9c2827" style="-fx-background-color: #9c2827;" text="Export" textFill="WHITE">
+        <font>
+            <Font name="System Bold" size="15.0" />
+        </font></JFXButton>
 </AnchorPane>

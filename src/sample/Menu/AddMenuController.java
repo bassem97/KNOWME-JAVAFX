@@ -21,6 +21,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
+import tray.notification.NotificationType;
+import tray.notification.TrayNotification;
 
 
 import javax.imageio.ImageIO;
@@ -118,7 +121,7 @@ public class AddMenuController implements Initializable {
 
         new MenuService().save(menu);
 
-        new tools.Alerts.Alert(Alert.AlertType.INFORMATION,"Menu ajouté  !",null,menu.getName()+" est ajouté !");
+        new TrayNotification("Information", menu.getName() + " a été Crée avec succès !", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("menus.fxml"));
         Parent root = null;

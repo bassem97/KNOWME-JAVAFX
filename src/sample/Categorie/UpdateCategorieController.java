@@ -10,6 +10,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.MenuBar;
+import javafx.util.Duration;
+import tray.notification.NotificationType;
+import tray.notification.TrayNotification;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -64,7 +68,8 @@ public class UpdateCategorieController implements Initializable {
         categorie.setNom(tfName.getText());
         categorie.setDescription(tfDescription.getText());
         new CategorieService().update(categorie);
-        new tools.Alerts.Alert(Alert.AlertType.INFORMATION,"Categorie modifié  !",null,categorie.getNom()+" est modifié !");
+        new TrayNotification("Information", categorie.getNom() + " a été Modifié avec succès !", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
+
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Categories.fxml"));
         Parent root = null;

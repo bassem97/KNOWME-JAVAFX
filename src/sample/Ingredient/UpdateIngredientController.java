@@ -18,6 +18,10 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.MenuBar;
+import javafx.util.Duration;
+import tray.notification.NotificationType;
+import tray.notification.TrayNotification;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -76,7 +80,7 @@ public class UpdateIngredientController implements Initializable {
         ingredient.setDescription(tfDescription.getText());
         ingredient.setMenu(new MenuService().findById(((Menu)listViewMenu.getSelectionModel().getSelectedItem()).getId()));
         new IngredientService().update(ingredient);
-        new tools.Alerts.Alert(Alert.AlertType.INFORMATION,"Ingredient modifié  !",null,ingredient.getDescription()+" est modifié !");
+        new TrayNotification("Information", ingredient.getDescription() + " a été Modifié avec succès !", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("ingredients.fxml"));
         Parent root = null;

@@ -1,7 +1,13 @@
 package sample.Ingredient;
 
 import Entities.Ingredient;
+import Services.CategorieService;
 import Services.IngredientService;
+import Services.MenuService;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
@@ -17,12 +23,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
+import javafx.util.Duration;
+import tray.notification.NotificationType;
+import tray.notification.TrayNotification;
 
+import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Date;
@@ -38,10 +52,13 @@ public class IngredientsController implements Initializable {
     public FontAwesomeIconView btnNew;
     public MenuBar eventMenu;
     public JFXTextField searchField;
+    public JFXButton export;
     private ObservableList<Ingredient> tvObservableList;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if(new IngredientService().findAll().size() == 0)
+            export.setVisible(false);
 
         // Menu Onclick
         eventMenu.getMenus().get(0).getItems().forEach(menuItem -> {
@@ -126,7 +143,7 @@ public class IngredientsController implements Initializable {
                                 int delete = new IngredientService().delete(ev.getId());
                                 if (delete == 1) {
                                     System.out.println("Deleted");
-                                    tvObservableList.remove(ev);
+                                    System.out.println(tvObservableList.remove(ev));
                                 }
 
 
@@ -205,122 +222,6 @@ public class IngredientsController implements Initializable {
 
         tableView.getColumns().add(colBtn2);
 
-
-
-//        TableColumn<Ingredient, Void> colBtn3 = new TableColumn<>("Sponsors");
-//
-//        Callback<TableColumn<Ingredient, Void>, TableCell<Ingredient, Void>> cellFactory3 = new Callback<TableColumn<Ingredient, Void>, TableCell<Ingredient, Void>>() {
-//
-//            @Override
-//            public TableCell<Ingredient, Void> call(final TableColumn<Ingredient, Void> param) {
-//                final TableCell<Ingredient, Void> cell = new TableCell<Ingredient, Void>() {
-//
-//                    private final JFXButton btnSponsors = new JFXButton();
-//
-//                    {
-//                        FontAwesomeIconView showIcon = new FontAwesomeIconView(FontAwesomeIcon.EYE);
-//                        showIcon.setSize("20px");
-//                        btnSponsors.setGraphic(showIcon);
-//                        btnSponsors.setOnAction((ActionEvent event) -> {
-//                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//                            alert.setTitle("Sponsors");
-//                            alert.setHeaderText(null);
-//                            alert.setContentText(new EventSponsorService().findByEvent(getTableView().getItems().get(getIndex())).toString());
-//                            alert.showAndWait();
-//                        });
-//                    }
-//
-//                    @Override
-//                    public void updateItem(Void item, boolean empty) {
-//                        super.updateItem(item, empty);
-//                        if (empty) {
-//                            setGraphic(null);
-//                        } else {
-//                            setGraphic(btnSponsors);
-//                        }
-//                    }
-//                };
-//                return cell;
-//            }
-//        };
-//
-//        colBtn3.setCellFactory(cellFactory3);
-//        tableView.getColumns().add(colBtn3);
-
-//        TableColumn<Ingredient, Void> colBtn4 = new TableColumn<>("Participer");
-//
-//        Callback<TableColumn<Ingredient, Void>, TableCell<Ingredient, Void>> cellFactory4 = new Callback<TableColumn<Ingredient, Void>, TableCell<Ingredient, Void>>() {
-//
-//            @Override
-//            public TableCell<Ingredient, Void> call(final TableColumn<Ingredient, Void> param) {
-//                final TableCell<Ingredient, Void> cell = new TableCell<Ingredient, Void>() {
-//
-//                    private final JFXButton btnParticiper = new JFXButton();
-//
-//                    {
-//                        FontAwesomeIconView showIcon = new FontAwesomeIconView(FontAwesomeIcon.CHEVRON_CIRCLE_RIGHT);
-//                        showIcon.setSize("20px");
-//                        btnParticiper.setGraphic(showIcon);
-//                        btnParticiper.setOnAction((ActionEvent event) -> {
-//
-//
-//                            if (getTableView().getItems().get(getIndex()).getDate().toLocalDate().isBefore(LocalDate.now())) {
-//                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//                                alert.setTitle("Information Dialog");
-//                                alert.setHeaderText(null);
-//                                alert.setContentText("Evènement déjà passé");
-//                                alert.showAndWait();
-//                            } else if (new ParticipantService().findByEventId(getTableView().getItems().get(getIndex()).getId()).size() >= getTableView().getItems().get(getIndex()).getNb_part_max()) {
-//                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//                                alert.setTitle("Information Dialog");
-//                                alert.setHeaderText(null);
-//                                alert.setContentText("Pas de place disponible");
-//                                alert.showAndWait();
-//                            } else if (new ParticipantService().findByUserIdAndEventId(UserSession.getUser().getId(), getTableView().getItems().get(getIndex()).getId()) == null) {
-//                                Participant participant = new Participant(getTableView().getItems().get(getIndex()), UserSession.getUser());
-//                                new ParticipantService().save(participant);
-//                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//                                alert.setTitle("Information Dialog");
-//                                alert.setHeaderText(null);
-//                                alert.setContentText("Vous participer à l'event " + getTableView().getItems().get(getIndex()).getName());
-//                                alert.showAndWait();
-//                                FXMLLoader loader = new FXMLLoader(getClass().getResource("../Participant/ParticipantList.fxml"));
-//                                Parent root = null;
-//                                try {
-//                                    root = loader.load();
-//                                    tableView.getScene().setRoot(root);
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            } else if (new ParticipantService().findByUserIdAndEventId(UserSession.getUser().getId(), getTableView().getItems().get(getIndex()).getId()) != null) {
-//                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//                                alert.setTitle("Information Dialog");
-//                                alert.setHeaderText(null);
-//                                alert.setContentText("Vous participez déjà à cet Ingredient");
-//                                alert.showAndWait();
-//                            }
-//                        });
-//                    }
-//
-//                    @Override
-//                    public void updateItem(Void item, boolean empty) {
-//                        super.updateItem(item, empty);
-//                        if (empty) {
-//                            setGraphic(null);
-//                        } else {
-//                            setGraphic(btnParticiper);
-//                        }
-//                    }
-//                };
-//                return cell;
-//            }
-//        };
-//
-//        colBtn4.setCellFactory(cellFactory4);
-//        tableView.getColumns().add(colBtn4);
-
-
-
     }
 
     public void newIngredient(MouseEvent mouseEvent) {
@@ -352,5 +253,48 @@ public class IngredientsController implements Initializable {
             FilteredList<Ingredient> x = tvObservableList.filtered(item -> item.getDescription().toLowerCase().contains(searchField.getText().toLowerCase()));
             tableView.setItems(x);
         }
+    }
+
+    public void export(ActionEvent actionEvent) throws DocumentException, FileNotFoundException {
+
+        /* Step-2: Initialize PDF documents - logical objects */
+        Document my_pdf_report = new Document();
+
+        String home = System.getProperty("user.home");
+        PdfWriter.getInstance(my_pdf_report, new FileOutputStream(home+"/Downloads/Ingrédients_PDF.pdf"));
+
+        my_pdf_report.open();
+        PdfPTable my_report_table = new PdfPTable(2);
+        //create a cell object
+
+        PdfPCell descriptionCell = new PdfPCell(new Phrase("Description"));
+        descriptionCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        descriptionCell.setBackgroundColor(BaseColor.CYAN);
+        my_report_table.addCell(descriptionCell);
+
+        PdfPCell Menus = new PdfPCell(new Phrase("Menu"));
+        Menus.setHorizontalAlignment(Element.ALIGN_CENTER);
+        Menus.setBackgroundColor(BaseColor.CYAN);
+        my_report_table.addCell(Menus);
+
+        new IngredientService().findAll().forEach(ingredient -> {
+            String description = ingredient.getDescription();
+            String menu = ingredient.getMenu().getName() ;
+            my_report_table.addCell(new PdfPCell(new Phrase(description)));
+            my_report_table.addCell(new PdfPCell(new Phrase(menu)));
+        });
+
+        /* Attach report table to PDF */
+        my_pdf_report.add(my_report_table);
+        my_pdf_report.close();
+        new TrayNotification("PDF téléchargé !", " PDF des Ingredient sous /Téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
+
+        File file = new File(home+"/Downloads/Ingrédients_PDF.pdf");
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
