@@ -60,7 +60,6 @@ import java.util.function.Function;
 
 import com.itextpdf.text.Image;
 
-import org.fxmisc.easybind.EasyBind;
 
 
 public class MenusController implements Initializable {
