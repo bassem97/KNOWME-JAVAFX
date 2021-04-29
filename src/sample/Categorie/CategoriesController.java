@@ -1,20 +1,16 @@
 package sample.Categorie;
 
 import Entities.Categorie;
-import Entities.Menu;
 import Services.CategorieService;
-import Services.IngredientService;
 import Services.MenuService;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -25,12 +21,14 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import tray.notification.NotificationType;
 import tray.notification.TrayNotification;
 
@@ -40,12 +38,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CategoriesController implements Initializable {
 
@@ -54,6 +50,7 @@ public class CategoriesController implements Initializable {
     public MenuBar eventMenu;
     public JFXTextField searchField;
     public JFXButton export;
+    public JFXButton exportExcel;
     private ObservableList<Categorie> tvObservableList;
 
     @Override
@@ -320,7 +317,7 @@ public class CategoriesController implements Initializable {
             /* Attach report table to PDF */
             my_pdf_report.add(my_report_table);
             my_pdf_report.close();
-        new TrayNotification("PDF téléchargé !", " PDF des catégories sous /Téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
+        new TrayNotification("PDF téléchargé !", " vérifiez votre dossier de téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
 
         File file = new File(home+"/Downloads/categories_PDF.pdf");
         try {
@@ -329,4 +326,81 @@ public class CategoriesController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    public void exportExcel(ActionEvent actionEvent) throws IOException {
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Reviews");
+
+        String home = System.getProperty("user.home");
+        String excelFilePath = home+"/Downloads/categories-Excel.xlsx";
+
+        writeHeaderLine(sheet);
+
+        List<Categorie> list = new CategorieService().findAll();
+        writeDataLines( list,workbook, sheet);
+
+        FileOutputStream outputStream = new FileOutputStream(excelFilePath);
+        workbook.write(outputStream);
+
+        new TrayNotification("Excel téléchargé !", " vérifiez votre dossier de téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
+
+
+        File file = new File(excelFilePath);
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private void writeDataLines(List<Categorie> list, XSSFWorkbook workbook, XSSFSheet sheet) {
+
+            AtomicInteger rowCount = new AtomicInteger(1);
+
+            list.forEach(categorie ->  {
+                String Nom = categorie.getNom();
+                String description = categorie.getDescription();
+
+                Row row = sheet.createRow(rowCount.getAndIncrement());
+
+                int columnCount = 0;
+                Cell cell = row.createCell(columnCount++);
+                cell.setCellValue(Nom);
+
+                cell = row.createCell(columnCount++);
+                cell.setCellValue(description);
+
+
+//
+//                CellStyle cellStyle = workbook.createCellStyle();
+//                CreationHelper creationHelper = workbook.getCreationHelper();
+//                cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat("yyyy-MM-dd HH:mm:ss"));
+//                cell.setCellStyle(cellStyle);
+//
+//                cell.setCellValue(timestamp);
+//
+//                cell = row.createCell(columnCount++);
+//                cell.setCellValue(rating);
+//
+//                cell = row.createCell(columnCount);
+//                cell.setCellValue(comment);
+            });
+
+    }
+
+    private void writeHeaderLine(XSSFSheet sheet) {
+        Row headerRow = sheet.createRow(0);
+
+        Cell headerCell = headerRow.createCell(0);
+        headerCell.setCellValue("NOM");
+
+        headerCell = headerRow.createCell(1);
+        headerCell.setCellValue("DESCRIPTION");
+
+    }
+
+
 }

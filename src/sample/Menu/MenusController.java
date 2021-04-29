@@ -17,7 +17,9 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.application.HostServices;
 import javafx.application.HostServices.*;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -33,6 +35,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import tray.notification.NotificationType;
 import tray.notification.TrayNotification;
 
@@ -49,7 +55,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+
 import com.itextpdf.text.Image;
+
+import org.fxmisc.easybind.EasyBind;
+
 
 public class MenusController implements Initializable {
 
@@ -278,6 +290,7 @@ public class MenusController implements Initializable {
         tableView.getColumns().add(colBtn3);
 
 
+
     }
 
     public void newMenu(MouseEvent mouseEvent) {
@@ -372,9 +385,84 @@ public class MenusController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        new TrayNotification("PDF téléchargé !", " vérifiez votre dossier de téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
+    }
+
+    public void exportExcel(ActionEvent actionEvent) throws IOException {
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Reviews");
+
+        String home = System.getProperty("user.home");
+        String excelFilePath = home+"/Downloads/Menus-Excel.xlsx";
+
+        writeHeaderLine(sheet);
+
+        List<Menu> list = new MenuService().findAll();
+        writeDataLines( list,workbook, sheet);
+
+        FileOutputStream outputStream = new FileOutputStream(excelFilePath);
+        workbook.write(outputStream);
+
+        new TrayNotification("Excel téléchargé !", " vérifiez votre dossier de téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
 
 
-        new TrayNotification("PDF téléchargé !", " PDF des Menus sous /Téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
+        File file = new File(excelFilePath);
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
     }
+
+    private void writeDataLines(List<Menu> list, XSSFWorkbook workbook, XSSFSheet sheet) {
+
+        AtomicInteger rowCount = new AtomicInteger(1);
+
+        list.forEach(menu ->  {
+            String nom = menu.getName();
+            String description = menu.getDescription();
+            String expiration = menu.getExpiration_date().toString();
+            String categorie = menu.getCategorie().getNom();
+
+            Row row = sheet.createRow(rowCount.getAndIncrement());
+
+            int columnCount = 0;
+            org.apache.poi.ss.usermodel.Cell cell = row.createCell(columnCount++);
+            cell.setCellValue(nom);
+
+            cell = row.createCell(columnCount++);
+            cell.setCellValue(description);
+
+            cell = row.createCell(columnCount++);
+            cell.setCellValue(expiration);
+
+            cell = row.createCell(columnCount++);
+            cell.setCellValue(categorie);
+        });
+
+    }
+
+    private void writeHeaderLine(XSSFSheet sheet) {
+        Row headerRow = sheet.createRow(0);
+
+        Cell headerCell = headerRow.createCell(0);
+        headerCell.setCellValue("NOM");
+
+        headerCell = headerRow.createCell(1);
+        headerCell.setCellValue("DESCRIPTION");
+
+        headerCell = headerRow.createCell(2);
+        headerCell.setCellValue("DATE EXPIRATION");
+
+        headerCell = headerRow.createCell(3);
+        headerCell.setCellValue("CATEGORIE");
+
+
+
+    }
+
+
 }

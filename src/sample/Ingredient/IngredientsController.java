@@ -1,5 +1,6 @@
 package sample.Ingredient;
 
+import Entities.Categorie;
 import Entities.Ingredient;
 import Services.CategorieService;
 import Services.IngredientService;
@@ -30,6 +31,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import tray.notification.NotificationType;
 import tray.notification.TrayNotification;
 
@@ -45,6 +50,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class IngredientsController implements Initializable {
 
@@ -287,7 +293,7 @@ public class IngredientsController implements Initializable {
         /* Attach report table to PDF */
         my_pdf_report.add(my_report_table);
         my_pdf_report.close();
-        new TrayNotification("PDF téléchargé !", " PDF des Ingredient sous /Téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
+        new TrayNotification("PDF téléchargé !", " vérifiez votre dossier de téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
 
         File file = new File(home+"/Downloads/Ingrédients_PDF.pdf");
         try {
@@ -297,4 +303,65 @@ public class IngredientsController implements Initializable {
         }
 
     }
+
+    public void exportExcel(ActionEvent actionEvent) throws IOException {
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Reviews");
+
+        String home = System.getProperty("user.home");
+        String excelFilePath = home+"/Downloads/Ingrédients-Excel.xlsx";
+
+        writeHeaderLine(sheet);
+
+        List<Ingredient> list = new IngredientService().findAll();
+        writeDataLines( list,workbook, sheet);
+
+        FileOutputStream outputStream = new FileOutputStream(excelFilePath);
+        workbook.write(outputStream);
+
+        new TrayNotification("Excel téléchargé !", " vérifiez votre dossier de téléchargement ", NotificationType.SUCCESS).showAndDismiss(Duration.seconds(5));
+
+
+        File file = new File(excelFilePath);
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private void writeDataLines(List<Ingredient> list, XSSFWorkbook workbook, XSSFSheet sheet) {
+
+        AtomicInteger rowCount = new AtomicInteger(1);
+
+        list.forEach(ingredient ->  {
+            String description = ingredient.getDescription();
+            String menu = ingredient.getMenu().getName();
+
+            Row row = sheet.createRow(rowCount.getAndIncrement());
+
+            int columnCount = 0;
+            org.apache.poi.ss.usermodel.Cell cell = row.createCell(columnCount++);
+            cell.setCellValue(description);
+
+            cell = row.createCell(columnCount++);
+            cell.setCellValue(menu);
+        });
+
+    }
+
+    private void writeHeaderLine(XSSFSheet sheet) {
+        Row headerRow = sheet.createRow(0);
+
+        Cell headerCell = headerRow.createCell(0);
+        headerCell.setCellValue("DESCRIPTION");
+
+        headerCell = headerRow.createCell(1);
+        headerCell.setCellValue("MENU");
+
+    }
+
 }
